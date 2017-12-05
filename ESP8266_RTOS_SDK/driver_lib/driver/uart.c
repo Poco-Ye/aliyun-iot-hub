@@ -359,7 +359,7 @@ uart0_rx_intr_handler(void *para)
     uint8 uart_no = UART0;//UartDev.buff_uart_no;
     uint8 fifo_len = 0;
     uint8 buf_idx = 0;
-    
+    u32_t ts = 0;
 
     uint32 uart_intr_status = READ_PERI_REG(UART_INT_ST(uart_no)) ;
 
@@ -378,7 +378,11 @@ uart0_rx_intr_handler(void *para)
                 buf_idx++;
             }
 			fifo_tmp[buf_idx]='\0';
-            printf("[yebin]----%s----",fifo_tmp);
+            ts = sntp_get_current_timestamp();
+			strcat(fifo_tmp,(const char *)sntp_get_real_time(ts));
+			
+			printf("[yebin]----%s----",fifo_tmp);
+
             WRITE_PERI_REG(UART_INT_CLR(UART0), UART_RXFIFO_FULL_INT_CLR);
         } else if (UART_RXFIFO_TOUT_INT_ST == (uart_intr_status & UART_RXFIFO_TOUT_INT_ST)) {
             printf("tout\r\n");
@@ -391,7 +395,11 @@ uart0_rx_intr_handler(void *para)
                 buf_idx++;
             }
 			fifo_tmp[buf_idx]='\0';
-            printf("[yebin]-----%s-----",fifo_tmp);
+            ts = sntp_get_current_timestamp();
+			strcat(fifo_tmp,(const char *)sntp_get_real_time(ts));
+			
+			printf("[yebin]----%s----",fifo_tmp);
+
             WRITE_PERI_REG(UART_INT_CLR(UART0), UART_RXFIFO_TOUT_INT_CLR);
         } else if (UART_TXFIFO_EMPTY_INT_ST == (uart_intr_status & UART_TXFIFO_EMPTY_INT_ST)) {
             printf("empty\n\r");

@@ -521,17 +521,17 @@ void sntpfn()
     os_printf("Initializing SNTP\n");
     sntp_setoperatingmode(SNTP_OPMODE_POLL);
 //    sntp_setservername(0, "120.25.115.19");
-    sntp_setservername(0, "202.112.29.82");        // set sntp server after got ip address, you had better to adjust the sntp server to your area
-//    sntp_setservername(1, "time-a.nist.gov");
-//    sntp_setservername(2, "ntp.sjtu.edu.cn");
-//    sntp_setservername(3, "0.nettime.pool.ntp.org");
+//    sntp_setservername(0, "202.112.29.82");        // set sntp server after got ip address, you had better to adjust the sntp server to your area
+//    sntp_setservername(0, "time-a.nist.gov");
+//    sntp_setservername(1, "ntp.sjtu.edu.cn");
+//    sntp_setservername(2, "0.nettime.pool.ntp.org");
 //    sntp_setservername(4, "time-b.nist.gov");
 //    sntp_setservername(5, "time-a.timefreq.bldrdoc.gov");
 //    sntp_setservername(6, "time-b.timefreq.bldrdoc.gov");
 //    sntp_setservername(7, "time-c.timefreq.bldrdoc.gov");
-//    sntp_setservername(8, "utcnist.colorado.edu");
-//    sntp_setservername(9, "time.nist.gov");
-//    sntp_setservername(10, "us.pool.ntp.org");
+    sntp_setservername(0, "0.cn.pool.ntp.org");
+    sntp_setservername(1, "1.cn.pool.ntp.org");
+    sntp_setservername(2, "2.cn.pool.ntp.org");
     sntp_init();
     while(1){
         u32_t ts = 0;
