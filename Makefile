@@ -77,6 +77,7 @@ LINKFLAGS_eagle.app.v6 = \
 	-ljson  \
 	-lsmartconfig \
 	-lspiffs	\
+        -ldriver       \
 	$(DEP_LIBS_eagle.app.v6)					\
 	-lcrypto \
 	-Wl,--end-group

@@ -8,7 +8,7 @@ export SDK_PATH=~/esp_iot_sdk_freertos
 export BIN_PATH=~/esp8266_bin
 !
 
-export SDK_PATH=$(pwd)/esp8266-rtos-sdk
+export SDK_PATH=$(pwd)/ESP8266_RTOS_SDK
 export BIN_PATH=$(pwd)/bin
 
 echo $SDK_PATH

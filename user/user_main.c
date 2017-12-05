@@ -42,6 +42,9 @@
 #include "aliyun_config.h"
 #include "aliyun_ota.h"
 
+#include "uart.h"
+
+
 extern int got_ip_flag;
 static int binary_file_length = 0;
 LOCAL os_timer_t ota_timer;
@@ -597,6 +600,7 @@ void user_init(void)
 {
     extern unsigned int max_content_len;
     max_content_len = 4 * 1024;
+    uart_init_new();
     printf("SDK version:%s \n", system_get_sdk_version());
     printf("\n******************************************  \n  SDK compile time:%s %s\n******************************************\n\n", __DATE__, __TIME__);
     IOT_OpenLog("mqtt");
