@@ -10,16 +10,18 @@
 
 #define MQTT_DIRECT
 
-#define PRODUCT_KEY             "ymXuzyfmuQb"
-#define DEVICE_NAME             "esp8266_test001"
-#define DEVICE_SECRET           "32fZgRbygua80rdVNLb5femE7wHBh7G9"
 
+#define PRODUCT_KEY             "guUmT5yuxec"
+#define DEVICE_NAME             "test1"
+#define DEVICE_SECRET           "KkX50XRQM2jq3l9uYrYSR1opf5kf9dzi"
 // These are pre-defined topics
 #define TOPIC_UPDATE            "/"PRODUCT_KEY"/"DEVICE_NAME"/update"
 #define TOPIC_ERROR             "/"PRODUCT_KEY"/"DEVICE_NAME"/update/error"
 #define TOPIC_GET               "/"PRODUCT_KEY"/"DEVICE_NAME"/get"
 #define TOPIC_DATA              "/"PRODUCT_KEY"/"DEVICE_NAME"/data"
 #define TOPIC_RELAY             "/"PRODUCT_KEY"/"DEVICE_NAME"/relay"
+
+
 
 #define WIFI_SSID       "Tencent ZC2"
 #define WIFI_PASSWORD   "zckj1234"
