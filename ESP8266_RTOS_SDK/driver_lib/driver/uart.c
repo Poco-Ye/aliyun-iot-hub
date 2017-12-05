@@ -30,6 +30,10 @@
 
 #include "uart.h"
 
+uint8 fifo_tmp[128] = {0};
+
+
+
 enum {
     UART_EVENT_RX_CHAR,
     UART_EVENT_MAX
@@ -355,7 +359,7 @@ uart0_rx_intr_handler(void *para)
     uint8 uart_no = UART0;//UartDev.buff_uart_no;
     uint8 fifo_len = 0;
     uint8 buf_idx = 0;
-    uint8 fifo_tmp[128] = {0};
+    
 
     uint32 uart_intr_status = READ_PERI_REG(UART_INT_ST(uart_no)) ;
 
@@ -369,10 +373,12 @@ uart0_rx_intr_handler(void *para)
             buf_idx = 0;
 
             while (buf_idx < fifo_len) {
-                uart_tx_one_char(UART0, READ_PERI_REG(UART_FIFO(UART0)) & 0xFF);
+				fifo_tmp[buf_idx]=READ_PERI_REG(UART_FIFO(UART0)) & 0xFF ; 
+                //uart_tx_one_char(UART0,fifo_tmp[buf_idx]);
                 buf_idx++;
             }
-
+			fifo_tmp[buf_idx]='\0';
+            printf("[yebin]----%s----",fifo_tmp);
             WRITE_PERI_REG(UART_INT_CLR(UART0), UART_RXFIFO_FULL_INT_CLR);
         } else if (UART_RXFIFO_TOUT_INT_ST == (uart_intr_status & UART_RXFIFO_TOUT_INT_ST)) {
             printf("tout\r\n");
@@ -380,10 +386,12 @@ uart0_rx_intr_handler(void *para)
             buf_idx = 0;
 
             while (buf_idx < fifo_len) {
-                uart_tx_one_char(UART0, READ_PERI_REG(UART_FIFO(UART0)) & 0xFF);
+				fifo_tmp[buf_idx]=READ_PERI_REG(UART_FIFO(UART0)) & 0xFF ;
+                //uart_tx_one_char(UART0, fifo_tmp[buf_idx]);
                 buf_idx++;
             }
-
+			fifo_tmp[buf_idx]='\0';
+            printf("[yebin]-----%s-----",fifo_tmp);
             WRITE_PERI_REG(UART_INT_CLR(UART0), UART_RXFIFO_TOUT_INT_CLR);
         } else if (UART_TXFIFO_EMPTY_INT_ST == (uart_intr_status & UART_TXFIFO_EMPTY_INT_ST)) {
             printf("empty\n\r");
@@ -404,7 +412,7 @@ uart_init_new(void)
     UART_WaitTxFifoEmpty(UART1);
 
     UART_ConfigTypeDef uart_config;
-    uart_config.baud_rate    = BIT_RATE_74880;
+    uart_config.baud_rate    = BIT_RATE_115200;
     uart_config.data_bits     = UART_WordLength_8b;
     uart_config.parity          = USART_Parity_None;
     uart_config.stop_bits     = USART_StopBits_1;
@@ -415,7 +423,7 @@ uart_init_new(void)
 
     UART_IntrConfTypeDef uart_intr;
     uart_intr.UART_IntrEnMask = UART_RXFIFO_TOUT_INT_ENA | UART_FRM_ERR_INT_ENA | UART_RXFIFO_FULL_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA;
-    uart_intr.UART_RX_FifoFullIntrThresh = 10;
+    uart_intr.UART_RX_FifoFullIntrThresh = 20;
     uart_intr.UART_RX_TimeOutIntrThresh = 2;
     uart_intr.UART_TX_FifoEmptyIntrThresh = 20;
     UART_IntrConfig(UART0, &uart_intr);

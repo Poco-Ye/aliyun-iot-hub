@@ -14,6 +14,12 @@ export BIN_PATH=$(pwd)/bin
 echo $SDK_PATH
 echo $BIN_PATH
 
+pushd $SDK_PATH/driver_lib/
+
+source ./make_lib.sh driver
+
+popd
+
 echo "gen_misc.sh version 20150911"
 echo ""
 
