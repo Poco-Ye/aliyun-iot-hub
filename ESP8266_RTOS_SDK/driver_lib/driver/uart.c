@@ -30,7 +30,11 @@
 
 #include "uart.h"
 
-uint8 fifo_tmp[128] = {0};
+uint8 fifo_tmp[255]={0};
+
+
+
+
 
 
 
@@ -378,8 +382,6 @@ uart0_rx_intr_handler(void *para)
                 buf_idx++;
             }
 			fifo_tmp[buf_idx]='\0';
-            ts = sntp_get_current_timestamp();
-			strcat(fifo_tmp,(const char *)sntp_get_real_time(ts));
 			
 			printf("[yebin]----%s----",fifo_tmp);
 
@@ -395,10 +397,9 @@ uart0_rx_intr_handler(void *para)
                 buf_idx++;
             }
 			fifo_tmp[buf_idx]='\0';
-            ts = sntp_get_current_timestamp();
-			strcat(fifo_tmp,(const char *)sntp_get_real_time(ts));
 			
-			printf("[yebin]----%s----",fifo_tmp);
+		
+
 
             WRITE_PERI_REG(UART_INT_CLR(UART0), UART_RXFIFO_TOUT_INT_CLR);
         } else if (UART_TXFIFO_EMPTY_INT_ST == (uart_intr_status & UART_TXFIFO_EMPTY_INT_ST)) {
@@ -431,7 +432,7 @@ uart_init_new(void)
 
     UART_IntrConfTypeDef uart_intr;
     uart_intr.UART_IntrEnMask = UART_RXFIFO_TOUT_INT_ENA | UART_FRM_ERR_INT_ENA | UART_RXFIFO_FULL_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA;
-    uart_intr.UART_RX_FifoFullIntrThresh = 20;
+    uart_intr.UART_RX_FifoFullIntrThresh = 255;
     uart_intr.UART_RX_TimeOutIntrThresh = 2;
     uart_intr.UART_TX_FifoEmptyIntrThresh = 20;
     UART_IntrConfig(UART0, &uart_intr);

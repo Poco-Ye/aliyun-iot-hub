@@ -23,7 +23,7 @@
 
 
 
-#define WIFI_SSID       "Tencent ZC2"
+#define WIFI_SSID       "Tencent ZC"
 #define WIFI_PASSWORD   "zckj1234"
 #define MSG_LEN_MAX             (2048)
 

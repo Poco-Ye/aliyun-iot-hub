@@ -46,8 +46,20 @@
 
 
 extern int got_ip_flag;
+extern uint8 fifo_tmp[255];
 static int binary_file_length = 0;
 LOCAL os_timer_t ota_timer;
+uint8 wifi_ssid[50]={0};
+uint8 wifi_pass[50]={0};
+uint8 key[50]={0};
+uint8 name[50]={0};
+uint8 secret[50]={0};
+uint8 weight[50]={0};
+uint8 high[50]={0};
+
+uint8 *fifo = NULL;
+int fifo_i;
+
 
 /******************************************************************************
  * FunctionName : user_rf_cal_sector_set
@@ -168,8 +180,10 @@ void event_handle(void *pcontext, void *pclient, iotx_mqtt_event_msg_pt msg)
 
 static void _demo_message_arrive(void *pcontext, void *pclient, iotx_mqtt_event_msg_pt msg)
 {
+    char *fifo_topic = NULL;
     iotx_mqtt_topic_info_pt ptopic_info = (iotx_mqtt_topic_info_pt) msg->msg;
 
+#if 0
     // print topic name and topic message
     EXAMPLE_TRACE("----");
     EXAMPLE_TRACE("Topic: '%.*s' (Length: %d)",
@@ -183,12 +197,21 @@ static void _demo_message_arrive(void *pcontext, void *pclient, iotx_mqtt_event_
                   ptopic_info->payload,
                   ptopic_info->payload_len);
     EXAMPLE_TRACE("----");
+	
+#endif
+    fifo_topic = (char *)ptopic_info->payload;
+    *(fifo_topic+ptopic_info->payload_len) = '\0';
+    EXAMPLE_TRACE("[yebin]---topic get data %s---",fifo_topic);
+    
+
+
 }
 
 
 int mqtt_client(void)
 {
     int rc = 0, msg_len, cnt = 0;
+	uint32 ts;
     void *pclient;
     iotx_conn_info_pt pconn_info;
     iotx_mqtt_param_t mqtt_params;
@@ -271,13 +294,17 @@ int mqtt_client(void)
 
     while (1) {
         if(got_ip_flag){
-            msg_len = snprintf(msg_pub, sizeof(msg_pub), "{\"attr_name\":\"temperature\", \"attr_value\":\"%d\"}", cnt);
+
+            msg_len = snprintf(msg_pub, sizeof(msg_pub), "weight:%dhigh:%dtime:",376,478);
+           // msg_len = snprintf(msg_pub, sizeof(msg_pub), "{\"attr_name\":\"weight\", \"attr_value\":\"%d\"}",\"attr_name\":\"high\",\"attr_value\":\"%d\"}", 17,56);
             if (msg_len < 0) {
                 EXAMPLE_TRACE("Error occur! Exit program");
                 rc = -1;
                 break;
             }
-
+            ts = sntp_get_current_timestamp();
+			strcat(msg_pub,(const char *)sntp_get_real_time(ts));
+		    msg_len += (int)strlen((const char *)sntp_get_real_time(ts));
             topic_msg.payload = (void *)msg_pub;
             topic_msg.payload_len = msg_len;
 
@@ -520,18 +547,18 @@ void sntpfn()
 
     os_printf("Initializing SNTP\n");
     sntp_setoperatingmode(SNTP_OPMODE_POLL);
-//    sntp_setservername(0, "120.25.115.19");
-//    sntp_setservername(0, "202.112.29.82");        // set sntp server after got ip address, you had better to adjust the sntp server to your area
-//    sntp_setservername(0, "time-a.nist.gov");
-//    sntp_setservername(1, "ntp.sjtu.edu.cn");
-//    sntp_setservername(2, "0.nettime.pool.ntp.org");
-//    sntp_setservername(4, "time-b.nist.gov");
-//    sntp_setservername(5, "time-a.timefreq.bldrdoc.gov");
-//    sntp_setservername(6, "time-b.timefreq.bldrdoc.gov");
-//    sntp_setservername(7, "time-c.timefreq.bldrdoc.gov");
-    sntp_setservername(0, "0.cn.pool.ntp.org");
-    sntp_setservername(1, "1.cn.pool.ntp.org");
-    sntp_setservername(2, "2.cn.pool.ntp.org");
+    sntp_setservername(0, "120.25.115.19");
+    sntp_setservername(1, "202.112.29.82");        // set sntp server after got ip address, you had better to adjust the sntp server to your area
+    sntp_setservername(2, "time-a.nist.gov");
+    sntp_setservername(3, "ntp.sjtu.edu.cn");
+    sntp_setservername(4, "0.nettime.pool.ntp.org");
+    sntp_setservername(5, "time-b.nist.gov");
+    sntp_setservername(6, "time-a.timefreq.bldrdoc.gov");
+    sntp_setservername(7, "time-b.timefreq.bldrdoc.gov");
+    sntp_setservername(8, "time-c.timefreq.bldrdoc.gov");
+    sntp_setservername(9, "ntp.sjtu.edu.cn");
+    sntp_setservername(10, "us.pool.ntp.org");
+    sntp_setservername(11, "time-a.timefreq.bldrdoc.gov");
     sntp_init();
     while(1){
         u32_t ts = 0;
@@ -563,7 +590,114 @@ void event_handler(System_Event_t *event)
     case EVENT_STAMODE_DISCONNECTED:
         ESP_LOGI(TAG, "Wifi disconnected, try to connect ...");
         got_ip_flag = 0;
-        wifi_station_connect();
+		
+        while(fifo_tmp[0]!='a'||fifo_tmp[1]!='A'||fifo_tmp[2]!='b'||fifo_tmp[3]!='B'||fifo_tmp[4]!='F')
+        {
+          printf("[yebin]----please set network by bluetooth---");
+		  vTaskDelay(2000 / portTICK_RATE_MS);
+		}
+
+        printf("[yebin]fifo_tmp--%s--",fifo_tmp);		
+        fifo = fifo_tmp;
+        while(*fifo!='\0')
+        {  
+          if(*fifo=='$'&&*(fifo+1)=='F'&&*(fifo+2)=='F')
+		  break;
+		  fifo++;
+        }
+		
+        fifo+=3;
+		fifo_i=0;
+        while(*fifo!='\0')
+        {  
+          if(*fifo=='$'&&*(fifo+1)=='F'&&*(fifo+2)=='F')
+		  break;
+		  key[fifo_i] =*fifo;
+		  fifo++;
+		  fifo_i++;
+        }
+		key[fifo_i+1]='\0';
+		
+        fifo+=3;
+		fifo_i=0;
+		while(*fifo!='\0')
+        {  
+          if(*fifo=='$'&&*(fifo+1)=='F'&&*(fifo+2)=='F')
+		  break;
+		  name[fifo_i] =*fifo;
+		  fifo++;
+		  fifo_i++;
+        }
+		name[fifo_i+1]='\0';
+
+        fifo+=3;
+		fifo_i=0;
+		while(*fifo!='\0')
+        {  
+          if(*fifo=='$'&&*(fifo+1)=='F'&&*(fifo+2)=='F')
+		  break;
+		  secret[fifo_i] =*fifo;
+		  fifo++;
+		  fifo_i++;
+        }
+		secret[fifo_i+1]='\0';
+
+        fifo+=3;
+		fifo_i=0;
+		while(*fifo!='\0')
+        {  
+          if(*fifo=='$'&&*(fifo+1)=='F'&&*(fifo+2)=='F')
+		  break;
+		  wifi_ssid[fifo_i] =*fifo;
+		  fifo++;
+		  fifo_i++;
+        }
+		wifi_ssid[fifo_i+1]='\0';
+
+
+		fifo+=3;
+		fifo_i=0;
+		while(*fifo!='\0')
+        {  
+          if(*fifo=='$'&&*(fifo+1)=='F'&&*(fifo+2)=='F')
+		  break;
+		  wifi_pass[fifo_i] =*fifo;
+		  fifo++;
+		  fifo_i++;
+        }
+		wifi_pass[fifo_i+1]='\0';
+		
+		fifo+=3;
+		fifo_i=0;
+		while(*fifo!='\0')
+        {  
+          if(*fifo=='$'&&*(fifo+1)=='F'&&*(fifo+2)=='F')
+		  break;
+		  weight[fifo_i] =*fifo;
+		  fifo++;
+		  fifo_i++;
+        }
+		weight[fifo_i+1]='\0';
+
+	    fifo+=3;
+		fifo_i=0;
+		while(*fifo!='\0')
+        {  
+          if(*fifo=='$'&&*(fifo+1)=='F'&&*(fifo+2)=='F')
+		  break;
+		  high[fifo_i] =*fifo;
+		  fifo++;
+		  fifo_i++;
+        }
+		high[fifo_i+1]='\0';
+	    printf("[yebin]--key is --%s--\n",key);
+		printf("[yebin]--name is --%s--\n",name);
+	    printf("[yebin]--secret is --%s--\n",secret);
+		printf("[yebin]--wifi ssid is --%s--\n",wifi_ssid);
+		printf("[yebin]--wifi_pass is --%s--\n",wifi_pass);
+	    printf("[yebin]--weight is --%s--\n",weight);
+		printf("[yebin]--high is --%s--\n",high);
+		wifi_station_connect();
         break;
 
     default:
@@ -596,6 +730,9 @@ void heap_check_task(void*para){
 }
 
 
+
+
+
 void user_init(void)
 {
     extern unsigned int max_content_len;
@@ -605,6 +742,70 @@ void user_init(void)
     printf("\n******************************************  \n  SDK compile time:%s %s\n******************************************\n\n", __DATE__, __TIME__);
     IOT_OpenLog("mqtt");
     IOT_SetLogLevel(IOT_LOG_DEBUG);
+
+
+/*--------------*/
+
+   //if(fifo_tmp[0]!='a'||fifo_tmp[1]!='A'||fifo_tmp[2]!='b'||fifo_tmp[3]!='B')
+  
+  // uint8 *fifo = fifo_tmp;
+  // printf("[yebin]----%s----",fifo);
+  // while(*fifo!='\0')
+  // {
+   //  fifo++;
+   //}
+
+/*
+if(fifo_tmp[0]=='a'&&fifo_tmp[1]=='A'&&fifo_tmp[2]=='b'&&fifo_tmp[3]=='B')
+{
+	printf("[yebin]----%s----",fifo_tmp);
+	uint8 *fifo = fifo_tmp;
+	uint8 *fifo_pot=NULL;
+	uint8 i=0;
+    while(*fifo!='\0')
+    {
+      if(*fifo == '$')
+      {fifo_pot = fifo;i=0;} 	
+      if(*(fifo_pot+1)=='0')
+      key[i] = *fifo;
+	  else if (*(fifo_pot+1)=='1')
+	  name[i] = *fifo;	
+	  else if (*(fifo_pot+1)=='2')
+	  secret[i] = *fifo;
+	  else if (*(fifo_pot+1)=='3')
+	  wifi_ssid[i] = *fifo;
+	  else if (*(fifo_pot+1)=='4')
+	  wifi_pass[i] = *fifo;
+	  else if (*(fifo_pot+1)=='5')
+	  weight[i] = *fifo;
+	  else if (*(fifo_pot+1)=='6')
+	  high[i] = *fifo;
+	  fifo++;
+	  i++;
+	}
+	printf("[yebin]--key--%s----",key);
+	printf("[yebin]--name--%s----",name);
+	printf("[yebin]--secret--%s----",secret);
+	printf("[yebin]--wifi_ssid--%s----",wifi_ssid);
+	printf("[yebin]--wifi_pass--%s----",wifi_pass);
+	printf("[yebin]--weight--%s----",weight);
+    printf("[yebin]--high--%s----",high);
+
+}
+
+
+
+
+
+
+
+
+
+
+/*--------------*/
+
+
+	
     initialize_wifi();
     got_ip_flag = 0;
 
