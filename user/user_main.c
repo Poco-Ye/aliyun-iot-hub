@@ -233,7 +233,7 @@ int mqtt_client(void)
 
     /* Device AUTH */
 
-    if (0 != IOT_SetupConnInfo(PRODUCT_KEY, DEVICE_NAME, DEVICE_SECRET, (void **)&pconn_info)) {
+    if (0 != IOT_SetupConnInfo(key, name, secret, (void **)&pconn_info)) {
         EXAMPLE_TRACE("AUTH request failed!");
         rc = -1;
         goto do_exit;
@@ -295,7 +295,7 @@ int mqtt_client(void)
     while (1) {
         if(got_ip_flag){
 
-            msg_len = snprintf(msg_pub, sizeof(msg_pub), "weight:%dhigh:%dtime:",376,478);
+            msg_len = snprintf(msg_pub, sizeof(msg_pub), "weight:%shigh:%stime:",weight,high);
            // msg_len = snprintf(msg_pub, sizeof(msg_pub), "{\"attr_name\":\"weight\", \"attr_value\":\"%d\"}",\"attr_name\":\"high\",\"attr_value\":\"%d\"}", 17,56);
             if (msg_len < 0) {
                 EXAMPLE_TRACE("Error occur! Exit program");
@@ -697,6 +697,11 @@ void event_handler(System_Event_t *event)
 		printf("[yebin]--wifi_pass is --%s--\n",wifi_pass);
 	    printf("[yebin]--weight is --%s--\n",weight);
 		printf("[yebin]--high is --%s--\n",high);
+		struct station_config config;
+        bzero(&config, sizeof(struct station_config));
+        sprintf(config.ssid, wifi_ssid);
+        sprintf(config.password, wifi_pass);
+        wifi_station_set_config(&config);
 		wifi_station_connect();
         break;
 
