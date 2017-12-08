@@ -57,6 +57,7 @@ uint8 secret[50]={0};
 uint8 weight[50]={0};
 uint8 high[50]={0};
 
+
 uint8 *fifo = NULL;
 int fifo_i;
 
@@ -218,7 +219,25 @@ int mqtt_client(void)
     iotx_mqtt_topic_info_t topic_msg;
     char msg_pub[128];
     char *msg_buf = NULL, *msg_readbuf = NULL;
+    
+    char *topic_data = (char *)os_malloc(sizeof(char)*50);
+	char *topic_relay = (char *)os_malloc(sizeof(char)*50);
+	if(topic_data== NULL||topic_relay==NULL)
+	{
+		EXAMPLE_TRACE("not enough memory");
+		  rc = -1;
+		  goto do_exit;
+	}
+	memset(topic_data,0x0,sizeof(char)*50);
+	memset(topic_data,0x0,sizeof(char)*50);
+	sprintf(topic_data,"/%s/%s/data",key,name);
+    sprintf(topic_relay,"/%s/%s/relay",key,name);
 
+
+
+
+	
+	
     if (NULL == (msg_buf = (char *)HAL_Malloc(MSG_LEN_MAX))) {
         EXAMPLE_TRACE("not enough memory");
         rc = -1;
@@ -271,7 +290,7 @@ int mqtt_client(void)
 
     /* Subscribe the specific topic */
 //    rc = IOT_MQTT_Subscribe(pclient, TOPIC_DATA, IOTX_MQTT_QOS1, _demo_message_arrive, NULL);
-    rc = IOT_MQTT_Subscribe(pclient, TOPIC_DATA, IOTX_MQTT_QOS1, _demo_message_arrive, NULL);
+    rc = IOT_MQTT_Subscribe(pclient, topic_data, IOTX_MQTT_QOS1, _demo_message_arrive, NULL);
 
     if (rc < 0) {
         IOT_MQTT_Destroy(&pclient);
@@ -308,7 +327,7 @@ int mqtt_client(void)
             topic_msg.payload = (void *)msg_pub;
             topic_msg.payload_len = msg_len;
 
-            rc = IOT_MQTT_Publish(pclient, TOPIC_DATA, &topic_msg);
+            rc = IOT_MQTT_Publish(pclient,topic_data, &topic_msg);
 
             if (rc < 0) {
                 EXAMPLE_TRACE("error occur when publish");
@@ -335,8 +354,8 @@ int mqtt_client(void)
         /* Generate topic message */
     }
 
-    IOT_MQTT_Unsubscribe(pclient, TOPIC_DATA);
-    IOT_MQTT_Unsubscribe(pclient, TOPIC_RELAY);
+    IOT_MQTT_Unsubscribe(pclient, topic_data);
+    IOT_MQTT_Unsubscribe(pclient, topic_relay);
 
     IOT_MQTT_Destroy(&pclient);
 
@@ -348,6 +367,13 @@ do_exit:
 
     if (NULL != msg_readbuf) {
         HAL_Free(msg_readbuf);
+    }
+	if (NULL != topic_data) {
+        os_free(topic_data);
+    }
+
+    if (NULL != topic_relay) {
+        os_free(topic_relay);
     }
 
     return rc;

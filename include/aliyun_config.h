@@ -11,8 +11,8 @@
 #define MQTT_DIRECT
 
 
-#define PRODUCT_KEY             "guUmT5yuxe"
-#define DEVICE_NAME             "test"
+#define PRODUCT_KEY             "guUmT5yuxec"
+#define DEVICE_NAME             "test1"
 #define DEVICE_SECRET           "KkX50XRQM2jq3l9uYrYSR1opf5kf9dz"
 // These are pre-defined topics
 #define TOPIC_UPDATE            "/"PRODUCT_KEY"/"DEVICE_NAME"/update"
